@@ -175,4 +175,20 @@ async function runDev(argv) {
   }
 }
 
-module.exports = { runDev };
+async function runCommand(argv) {
+  const [command, ...args] = argv;
+  const selected = command ? commands[command] : null;
+
+  if (!selected) {
+    printUsage();
+    return;
+  }
+
+  try {
+    await selected.run(args);
+  } catch (error) {
+    console.error(`[dev:${command}] Error:`, error.message);
+  }
+}
+
+module.exports = { runDev, runCommand };
