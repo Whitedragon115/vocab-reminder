@@ -1,8 +1,8 @@
-import axios from "axios";
-import { requireWebhookUrl } from "./utils/validate.js";
-import MessageBuilder from "./builders/MessageBuilder.js";
+const axios = require("axios");
+const { requireWebhookUrl } = require("./utils/validate");
+const MessageBuilder = require("./builders/MessageBuilder");
 
-export class WebhookClient {
+class WebhookClient {
   constructor(url) {
     requireWebhookUrl(url);
     this.url = url;
@@ -17,3 +17,5 @@ export class WebhookClient {
     return response.data;
   }
 }
+
+module.exports = { WebhookClient };

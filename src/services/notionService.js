@@ -1,11 +1,10 @@
-import { Client } from "@notionhq/client";
-import { createPrismaClient } from "../db.js";
-import { parseVocabularyPage } from "../parsers/notionParser.js";
-import { loadConfig, saveConfig } from "./configService.js";
-import { log } from "../logger.js";
+const { Client } = require("@notionhq/client");
+const { createPrismaClient } = require("../db");
+const { parseVocabularyPage } = require("../parsers/notionParser");
+const { loadConfig, saveConfig } = require("./configService");
+const { log } = require("../logger");
 
 const RECONNECT_EVERY = 50;
-
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
 async function fetchAllPages(since) {
@@ -40,7 +39,7 @@ async function fetchAllPages(since) {
   return pages;
 }
 
-export async function syncNewVocabularies() {
+async function syncNewVocabularies() {
   const config = loadConfig();
   const since = config.lastNotionSync;
 
@@ -63,16 +62,13 @@ export async function syncNewVocabularies() {
   let failed = 0;
   let db = createPrismaClient();
 
-  // Load existing pageIds to skip pages already in DB
   const existing = await db.notionCache.findMany({ select: { pageId: true } });
   const existingIds = new Set(existing.map((e) => e.pageId));
   const newPages = pages.filter((p) => !existingIds.has(p.id));
   const skippedExisting = pages.length - newPages.length;
 
   if (skippedExisting > 0) {
-    log.info(
-      `Skipping ${skippedExisting} page(s) already in DB — only processing ${newPages.length} new`,
-    );
+    log.info(`Skipping ${skippedExisting} page(s) already in DB — only processing ${newPages.length} new`);
   }
 
   if (newPages.length === 0) {
@@ -142,3 +138,5 @@ export async function syncNewVocabularies() {
   if (failed > 0) log.error(`Failed:  ${failed}`);
   log.divider();
 }
+
+module.exports = { syncNewVocabularies };

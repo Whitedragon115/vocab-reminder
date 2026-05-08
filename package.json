@@ -2,13 +2,12 @@
   "name": "dc-vocabulary",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "tsx index.js",
-    "sync": "tsx -e \"import('./src/scheduler.js').then(m => m.runNotionSync())\"",
-    "remind": "tsx -e \"import('./src/scheduler.js').then(m => m.runReminder())\"",
-    "dev": "tsx scripts/dev.js",
+    "start": "node index.js",
+    "sync": "node -e \"require('./src/scheduler').runNotionSync()\"",
+    "remind": "node -e \"require('./src/scheduler').runReminder()\"",
+    "dev": "node scripts/dev.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "node scripts/setup-git-hooks.js",
     "format": "prettier . --write",
@@ -33,8 +32,7 @@
   },
   "devDependencies": {
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.3",
-    "tsx": "^4.21.0"
+    "prettier": "^3.8.3"
   },
   "lint-staged": {
     "*.{js,cjs,mjs,json,md,yml,yaml}": "prettier --write"

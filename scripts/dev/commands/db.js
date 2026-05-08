@@ -1,8 +1,8 @@
-import { endSection, printSection, SECTION_DIVIDER } from "../format.js";
-import { parseJsonList } from "../utils.js";
+const { endSection, printSection, SECTION_DIVIDER } = require("../format");
+const { parseJsonList } = require("../utils");
+const { createPrismaClient } = require("../../../src/db");
 
-export async function cmdDb() {
-  const { createPrismaClient } = await import("../../../src/db.js");
+async function cmdDb() {
   const db = createPrismaClient();
 
   try {
@@ -70,9 +70,8 @@ export async function cmdDb() {
   }
 }
 
-export async function cmdVocab(args) {
+async function cmdVocab(args) {
   const query = args[0];
-  const { createPrismaClient } = await import("../../../src/db.js");
   const db = createPrismaClient();
 
   try {
@@ -105,3 +104,5 @@ export async function cmdVocab(args) {
     await db.$disconnect();
   }
 }
+
+module.exports = { cmdDb, cmdVocab };

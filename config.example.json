@@ -1,0 +1,24 @@
+{
+  "debug": false,
+  "logLevel": "info",
+  "modelPricing": {
+    "gpt-4o": { "input": 2.5, "output": 10 },
+    "gpt-4o-mini": { "input": 0.15, "output": 0.6 }
+  },
+  "currency": {
+    "code": "USD",
+    "rate": 1
+  },
+  "reminderFrequency": ["08:00", "12:00", "18:00"],
+  "vocabulariesPerReminder": 5,
+  "forgettingCurveWeight": [-1, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 4, 3, 2, 1],
+  "lastNotionSync": null,
+  "news": {
+    "enabled": true,
+    "topics": ["technology", "science"],
+    "language": "en",
+    "wordCount": 300,
+    "userBio": "Introduce yourself here so the AI can pick articles you'll find interesting.",
+    "userPrompt": "Write in a friendly, natural tone. Keep the vocabulary highlighted in bold exactly as given."
+  }
+}

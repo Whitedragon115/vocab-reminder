@@ -1,9 +1,9 @@
-import NewsAPI from "newsapi";
-import OpenAI from "openai";
-import { loadConfig } from "./configService.js";
-import { createPrismaClient } from "../db.js";
-import { log } from "../logger.js";
-import { debugRequest, debugResponse } from "../debugLogger.js";
+const NewsAPI = require("newsapi");
+const { OpenAI } = require("openai");
+const { loadConfig } = require("./configService");
+const { createPrismaClient } = require("../db");
+const { log } = require("../logger");
+const { debugRequest, debugResponse } = require("../debugLogger");
 
 const MAX_SEEN = 200;
 
@@ -19,11 +19,7 @@ async function fetchArticles(topics, language) {
   debugResponse("NewsAPI", "v2.everything", {
     totalResults: res.totalResults,
     returned: res.articles?.length ?? 0,
-    articles: (res.articles ?? []).map((a) => ({
-      title: a.title,
-      url: a.url,
-      source: a.source?.name,
-    })),
+    articles: (res.articles ?? []).map((a) => ({ title: a.title, url: a.url, source: a.source?.name })),
   });
 
   const articles = (res.articles || []).filter((a) => a.title && a.description && a.url);
@@ -39,24 +35,16 @@ async function selectArticle(articles, userPrompt) {
   log.ai(`Asking AI to pick from ${articles.length} candidates...`);
   if (config.userBio) log.info(`User bio provided (${config.userBio.length} chars)`);
 
-  const articleList = articles
-    .map((a, i) => `${i + 1}. ${a.title}\n   ${a.description}`)
-    .join("\n\n");
+  const articleList = articles.map((a, i) => `${i + 1}. ${a.title}\n   ${a.description}`).join("\n\n");
 
   const selectMessages = [
     {
       role: "system",
       content: `You are a news curator for a language learner. Based on who the user is and their preferences, pick the single most interesting and relevant article from the list. Return JSON: {"index": <1-based number>}`,
     },
-    {
-      role: "user",
-      content: `${userBio}User preferences: "${userPrompt}"\n\nArticles:\n${articleList}`,
-    },
+    { role: "user", content: `${userBio}User preferences: "${userPrompt}"\n\nArticles:\n${articleList}` },
   ];
-  debugRequest("OpenAI", "article-selection", {
-    model: process.env.CHATGPT_MODEL ?? "gpt-4o-mini",
-    messages: selectMessages,
-  });
+  debugRequest("OpenAI", "article-selection", { model: process.env.CHATGPT_MODEL ?? "gpt-4o-mini", messages: selectMessages });
 
   const completion = await openai.chat.completions.create({
     model: process.env.CHATGPT_MODEL ?? "gpt-4o-mini",
@@ -64,10 +52,7 @@ async function selectArticle(articles, userPrompt) {
     response_format: { type: "json_object" },
   });
 
-  debugResponse("OpenAI", "article-selection", {
-    raw: completion.choices[0].message.content,
-    usage: completion.usage,
-  });
+  debugResponse("OpenAI", "article-selection", { raw: completion.choices[0].message.content, usage: completion.usage });
   log.tokens("Article Selection", process.env.CHATGPT_MODEL ?? "gpt-4o-mini", completion.usage);
 
   const result = JSON.parse(completion.choices[0].message.content);
@@ -77,7 +62,6 @@ async function selectArticle(articles, userPrompt) {
   log.success(`AI chose article #${index + 1}: "${chosen.title}"`);
   log.detail("Source", chosen.source?.name ?? "unknown");
   log.detail("URL", chosen.url);
-
   return chosen;
 }
 
@@ -91,17 +75,13 @@ async function generatePassage(article, words, wordCount) {
   log.detail("Words", words.join(", "));
 
   const systemPrompt = `You are helping an English learner. Rewrite the given news article as a ~${target} word passage that naturally includes the provided vocabulary words. Bold each vocabulary word using **word**. Follow the user's style preference. Return JSON: {"Title": "<string>", "Passage": "<string>", "Category": ["<string>"]}`;
-
   const userMessage = `Vocabulary words to include: ${words.join(", ")}\n\nStyle preference: "${userPrompt}"\n\nOriginal article:\nTitle: ${article.title}\n${article.description}`;
 
   const passageMessages = [
     { role: "system", content: systemPrompt },
     { role: "user", content: userMessage },
   ];
-  debugRequest("OpenAI", "passage-generation", {
-    model: process.env.CHATGPT_MODEL ?? "gpt-4o-mini",
-    messages: passageMessages,
-  });
+  debugRequest("OpenAI", "passage-generation", { model: process.env.CHATGPT_MODEL ?? "gpt-4o-mini", messages: passageMessages });
 
   const completion = await openai.chat.completions.create({
     model: process.env.CHATGPT_MODEL ?? "gpt-4o-mini",
@@ -109,21 +89,16 @@ async function generatePassage(article, words, wordCount) {
     response_format: { type: "json_object" },
   });
 
-  debugResponse("OpenAI", "passage-generation", {
-    raw: completion.choices[0].message.content,
-    usage: completion.usage,
-  });
+  debugResponse("OpenAI", "passage-generation", { raw: completion.choices[0].message.content, usage: completion.usage });
   log.tokens("Passage Generation", process.env.CHATGPT_MODEL ?? "gpt-4o-mini", completion.usage);
 
   const passage = JSON.parse(completion.choices[0].message.content);
   const actualWords = passage.Passage.trim().split(/\s+/).length;
-  log.success(
-    `Passage generated — ${actualWords} words, categories: ${(passage.Category ?? []).join(", ")}`,
-  );
+  log.success(`Passage generated — ${actualWords} words, categories: ${(passage.Category ?? []).join(", ")}`);
   return passage;
 }
 
-export async function buildNewsContent(words) {
+async function buildNewsContent(words) {
   log.divider("News");
   const config = loadConfig();
   const { topics, language, userPrompt, wordCount } = config.news;
@@ -149,10 +124,7 @@ export async function buildNewsContent(words) {
       candidates = allArticles;
     }
 
-    if (candidates.length === 0) {
-      log.error("No articles available");
-      return null;
-    }
+    if (candidates.length === 0) { log.error("No articles available"); return null; }
 
     log.step("News", "AI is selecting the best article...");
     const article = await selectArticle(candidates, userPrompt ?? "");
@@ -162,19 +134,11 @@ export async function buildNewsContent(words) {
 
     log.step("News", "Saving article to seen history...");
     await db.seenNews.create({
-      data: {
-        url: article.url,
-        title: article.title,
-        category: (passage.Category ?? []).join(", "),
-      },
+      data: { url: article.url, title: article.title, category: (passage.Category ?? []).join(", ") },
     });
 
     if (seenCount >= MAX_SEEN) {
-      const oldest = await db.seenNews.findMany({
-        orderBy: { seenAt: "asc" },
-        take: seenCount - MAX_SEEN + 1,
-        select: { id: true },
-      });
+      const oldest = await db.seenNews.findMany({ orderBy: { seenAt: "asc" }, take: seenCount - MAX_SEEN + 1, select: { id: true } });
       await db.seenNews.deleteMany({ where: { id: { in: oldest.map((r) => r.id) } } });
       log.info("Trimmed oldest entries to stay within limit");
     }
@@ -189,3 +153,5 @@ export async function buildNewsContent(words) {
     await db.$disconnect();
   }
 }
+
+module.exports = { buildNewsContent };

@@ -1,9 +1,8 @@
-import { endSection, printSection } from "../format.js";
+const { endSection, printSection } = require("../format");
+const { sendReminder, destroyDmClient } = require("../../../src/services/discordService");
+const EmbedBuilder = require("../../../src/builders/EmbedBuilder");
 
-export async function cmdDiscord() {
-  const { sendReminder, destroyDmClient } = await import("../../../src/services/discordService.js");
-  const EmbedBuilder = (await import("../../../src/builders/EmbedBuilder.js")).default;
-
+async function cmdDiscord() {
   const embed = new EmbedBuilder();
   embed.setTitle("Test Embed");
   embed.setDescription("This is a test message from the dev script. The bot is working correctly!");
@@ -20,3 +19,5 @@ export async function cmdDiscord() {
     await destroyDmClient();
   }
 }
+
+module.exports = { cmdDiscord };

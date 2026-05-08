@@ -5,7 +5,13 @@
 node_modules/
 .pnpm-store/
 
-data/
 .claude/
+
+# Runtime data
+config.json
+!config.example.json
+data/*.db
+data/backups/
+data/logs/
 
 src/generated/prisma/

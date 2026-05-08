@@ -1,4 +1,4 @@
-import "dotenv/config";
-import { runDev } from "./dev/index.js";
+require("dotenv/config");
+const { runDev } = require("./dev/index");
 
 runDev(process.argv.slice(2));

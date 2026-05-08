@@ -1,24 +1,13 @@
-import EmbedBuilder from "./EmbedBuilder.js";
+const EmbedBuilder = require("./EmbedBuilder");
 
-export default class MessageBuilder {
+class MessageBuilder {
   constructor() {
     this._data = {};
   }
 
-  setContent(content) {
-    this._data.content = content;
-    return this;
-  }
-
-  setUsername(username) {
-    this._data.username = username;
-    return this;
-  }
-
-  setAvatarUrl(url) {
-    this._data.avatar_url = url;
-    return this;
-  }
+  setContent(content) { this._data.content = content; return this; }
+  setUsername(username) { this._data.username = username; return this; }
+  setAvatarUrl(url) { this._data.avatar_url = url; return this; }
 
   addEmbed(embed) {
     if (!this._data.embeds) this._data.embeds = [];
@@ -27,7 +16,7 @@ export default class MessageBuilder {
     return this;
   }
 
-  toJSON() {
-    return { ...this._data };
-  }
+  toJSON() { return { ...this._data }; }
 }
+
+module.exports = MessageBuilder;

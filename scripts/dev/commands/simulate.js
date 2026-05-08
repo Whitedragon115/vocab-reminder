@@ -1,5 +1,7 @@
-import { bar, endSection, printSection, SECTION_DIVIDER } from "../format.js";
-import { weightedSample } from "../utils.js";
+const { bar, endSection, printSection, SECTION_DIVIDER } = require("../format");
+const { weightedSample } = require("../utils");
+const { createPrismaClient } = require("../../../src/db");
+const { loadConfig } = require("../../../src/services/configService");
 
 function getMilestones() {
   return new Set([1, 5, 10, 20, 30, 50, 100]);
@@ -100,10 +102,8 @@ function printCoverageSummary(
   );
 }
 
-export async function cmdSimulate(args) {
+async function cmdSimulate(args) {
   const rounds = Number.parseInt(args[0], 10) || 30;
-  const { createPrismaClient } = await import("../../../src/db.js");
-  const { loadConfig } = await import("../../../src/services/configService.js");
   const db = createPrismaClient();
 
   let vocab;
@@ -159,3 +159,5 @@ export async function cmdSimulate(args) {
   printCoverageSummary(stages, firstSeen, hits, vocab.length, initialStageZeroCount, perReminder);
   endSection();
 }
+
+module.exports = { cmdSimulate };

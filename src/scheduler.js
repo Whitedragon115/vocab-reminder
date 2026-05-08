@@ -1,11 +1,11 @@
-import "dotenv/config";
-import cron from "node-cron";
-import { syncNewVocabularies } from "./services/notionService.js";
-import { selectVocabularies, buildReminderEmbeds } from "./services/reminderService.js";
-import { buildNewsContent } from "./services/newsService.js";
-import { sendReminder } from "./services/discordService.js";
-import { loadConfig } from "./services/configService.js";
-import { log } from "./logger.js";
+require("dotenv/config");
+const cron = require("node-cron");
+const { syncNewVocabularies } = require("./services/notionService");
+const { selectVocabularies, buildReminderEmbeds } = require("./services/reminderService");
+const { buildNewsContent } = require("./services/newsService");
+const { sendReminder } = require("./services/discordService");
+const { loadConfig } = require("./services/configService");
+const { log } = require("./logger");
 
 const TIME_ZONE = process.env.TIME_ZONE ?? "UTC";
 
@@ -14,7 +14,7 @@ function timeToCron(timeStr) {
   return `${minute} ${hour} * * *`;
 }
 
-export async function runReminder() {
+async function runReminder() {
   try {
     log.step(
       "Scheduler",
@@ -50,7 +50,7 @@ export async function runReminder() {
   }
 }
 
-export async function runNotionSync() {
+async function runNotionSync() {
   try {
     log.step("Scheduler", "Notion sync triggered");
     await syncNewVocabularies();
@@ -59,7 +59,7 @@ export async function runNotionSync() {
   }
 }
 
-export function startScheduler() {
+function startScheduler() {
   const config = loadConfig();
   const raw = config.reminderFrequency ?? process.env.REMINDER_FREQUENCY ?? "08:00";
   const frequencies = Array.isArray(raw) ? raw : raw.split(",").map((t) => t.trim());
@@ -75,3 +75,5 @@ export function startScheduler() {
   log.success(`Notion sync scheduled at 00:00 (${TIME_ZONE})`);
   log.divider();
 }
+
+module.exports = { runReminder, runNotionSync, startScheduler };

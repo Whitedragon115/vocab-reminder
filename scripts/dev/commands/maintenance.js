@@ -1,8 +1,10 @@
-import fs from "fs";
-import path from "path";
-import { endSection, printSection } from "../format.js";
-import { prompt } from "../io.js";
-import { formatTimestamp } from "../utils.js";
+const fs = require("fs");
+const path = require("path");
+const { endSection, printSection } = require("../format");
+const { prompt } = require("../io");
+const { formatTimestamp } = require("../utils");
+const { createPrismaClient } = require("../../../src/db");
+const { loadConfig, saveConfig } = require("../../../src/services/configService");
 
 function getDatabasePath() {
   return path.resolve("data/data.db");
@@ -20,7 +22,7 @@ function getBackupFiles(backupDir) {
     .reverse();
 }
 
-export async function cmdBackup() {
+async function cmdBackup() {
   const dbPath = getDatabasePath();
 
   if (!fs.existsSync(dbPath)) {
@@ -64,8 +66,7 @@ export async function cmdBackup() {
   endSection();
 }
 
-export async function cmdReset() {
-  const { createPrismaClient } = await import("../../../src/db.js");
+async function cmdReset() {
   const db = createPrismaClient();
 
   try {
@@ -103,8 +104,7 @@ export async function cmdReset() {
   }
 }
 
-export async function cmdClean() {
-  const { createPrismaClient } = await import("../../../src/db.js");
+async function cmdClean() {
   const db = createPrismaClient();
 
   try {
@@ -172,9 +172,7 @@ export async function cmdClean() {
   }
 }
 
-export async function cmdClear() {
-  const { createPrismaClient } = await import("../../../src/db.js");
-  const { loadConfig, saveConfig } = await import("../../../src/services/configService.js");
+async function cmdClear() {
   const db = createPrismaClient();
 
   try {
@@ -209,7 +207,7 @@ export async function cmdClear() {
   }
 }
 
-export async function cmdRestore() {
+async function cmdRestore() {
   const backupDir = getBackupDirectory();
   const dbPath = getDatabasePath();
 
@@ -262,3 +260,5 @@ export async function cmdRestore() {
   console.log(`  Restored from: ${selected}`);
   endSection();
 }
+
+module.exports = { cmdBackup, cmdClean, cmdClear, cmdReset, cmdRestore };

@@ -1,9 +1,7 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+const fs = require("fs");
+const path = require("path");
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_PATH = path.resolve(__dirname, "../data/config.json");
+const CONFIG_PATH = path.resolve(__dirname, "../config.json");
 const LOG_DIR = path.resolve(__dirname, "../data/logs");
 
 const c = {
@@ -33,22 +31,20 @@ function writeToFile(entry) {
   fs.appendFileSync(getLogPath(), JSON.stringify(entry, null, 2) + "\n" + "─".repeat(60) + "\n");
 }
 
-export function debugRequest(service, action, payload) {
+function debugRequest(service, action, payload) {
   if (!isDebugEnabled()) return;
-
   const timestamp = new Date().toISOString();
   console.log(`${c.magenta}${c.bold}[DEBUG ▶ ${service}] ${action}${c.reset}`);
   console.log(`${c.dim}${JSON.stringify(payload, null, 2)}${c.reset}`);
-
   writeToFile({ type: "request", timestamp, service, action, payload });
 }
 
-export function debugResponse(service, action, payload) {
+function debugResponse(service, action, payload) {
   if (!isDebugEnabled()) return;
-
   const timestamp = new Date().toISOString();
   console.log(`${c.magenta}${c.bold}[DEBUG ◀ ${service}] ${action}${c.reset}`);
   console.log(`${c.gray}${JSON.stringify(payload, null, 2)}${c.reset}`);
-
   writeToFile({ type: "response", timestamp, service, action, payload });
 }
+
+module.exports = { debugRequest, debugResponse };

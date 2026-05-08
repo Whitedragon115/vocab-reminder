@@ -1,8 +1,12 @@
-import "dotenv/config";
-import { Client } from "@notionhq/client";
-import { endSection, printSection, SECTION_DIVIDER } from "../format.js";
-import { prompt } from "../io.js";
-import { log } from "../../../src/logger.js";
+require("dotenv/config");
+const { Client } = require("@notionhq/client");
+const { endSection, printSection, SECTION_DIVIDER } = require("../format");
+const { prompt } = require("../io");
+const { log } = require("../../../src/logger");
+const { syncNewVocabularies } = require("../../../src/services/notionService");
+const { loadConfig } = require("../../../src/services/configService");
+const { createPrismaClient } = require("../../../src/db");
+const { parseVocabularyPage } = require("../../../src/parsers/notionParser");
 
 function getNotion() {
   if (!process.env.NOTION_TOKEN) throw new Error("NOTION_TOKEN is not set in .env");
@@ -20,16 +24,12 @@ function parseJson(str) {
 // ─── pull ────────────────────────────────────────────────────────────────────
 
 async function cmdNotionPull() {
-  const { syncNewVocabularies } = await import("../../../src/services/notionService.js");
   await syncNewVocabularies();
 }
 
 // ─── check ───────────────────────────────────────────────────────────────────
 
 async function cmdNotionCheck() {
-  const { loadConfig } = await import("../../../src/services/configService.js");
-  const { createPrismaClient } = await import("../../../src/db.js");
-
   const config = loadConfig();
   const lastSync = config.lastNotionSync;
   const db = createPrismaClient();
@@ -98,7 +98,6 @@ async function cmdNotionUpdate(args) {
     return;
   }
 
-  const { createPrismaClient } = await import("../../../src/db.js");
   const db = createPrismaClient();
 
   try {
@@ -117,7 +116,6 @@ async function cmdNotionUpdate(args) {
 
     const notion = getNotion();
     const page = await notion.pages.retrieve({ page_id: entry.pageId });
-    const { parseVocabularyPage } = await import("../../../src/parsers/notionParser.js");
     const data = await parseVocabularyPage(page);
 
     if (!data.word) {
@@ -154,7 +152,6 @@ async function cmdNotionView(args) {
     return;
   }
 
-  const { createPrismaClient } = await import("../../../src/db.js");
   const db = createPrismaClient();
 
   try {
@@ -209,7 +206,6 @@ async function cmdNotionView(args) {
 
 async function cmdNotionWarn() {
   log.step("Notion", "Scanning for entries with missing required fields...");
-  const { createPrismaClient } = await import("../../../src/db.js");
   const db = createPrismaClient();
 
   const REQUIRED = ["word", "partOfSpeech", "definition", "sentences"];
@@ -253,7 +249,6 @@ async function cmdNotionWarn() {
 
 async function cmdNotionFix() {
   log.step("Notion", "Finding entries with missing required fields...");
-  const { createPrismaClient } = await import("../../../src/db.js");
   const db = createPrismaClient();
 
   try {
@@ -274,7 +269,6 @@ async function cmdNotionFix() {
     log.info(`Found ${targets.length} incomplete entries — re-fetching from Notion...`);
 
     const notion = getNotion();
-    const { parseVocabularyPage } = await import("../../../src/parsers/notionParser.js");
 
     let fixed = 0;
     let failed = 0;
@@ -347,7 +341,7 @@ function printHelp() {
 
 // ─── entry ────────────────────────────────────────────────────────────────────
 
-export async function cmdNotion(args) {
+async function cmdNotion(args) {
   const [sub, ...rest] = args;
   switch (sub) {
     case "pull":
@@ -368,3 +362,5 @@ export async function cmdNotion(args) {
       printHelp();
   }
 }
+
+module.exports = { cmdNotion };

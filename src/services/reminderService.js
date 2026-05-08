@@ -1,7 +1,7 @@
-import { createPrismaClient } from "../db.js";
-import { loadConfig } from "./configService.js";
-import { buildEmbeds } from "../parsers/templateParser.js";
-import { log } from "../logger.js";
+const { createPrismaClient } = require("../db");
+const { loadConfig } = require("./configService");
+const { buildEmbeds } = require("../parsers/templateParser");
+const { log } = require("../logger");
 
 function weightedSample(pool, weights, n) {
   const selected = [];
@@ -24,7 +24,7 @@ function weightedSample(pool, weights, n) {
   return selected;
 }
 
-export async function selectVocabularies() {
+async function selectVocabularies() {
   log.divider("Reminder");
   const config = loadConfig();
   const { forgettingCurveWeight, vocabulariesPerReminder } = config;
@@ -72,10 +72,7 @@ export async function selectVocabularies() {
   log.step("Reminder", "Advancing stage indices in database...");
   for (const vocab of selected) {
     const nextStage = Math.min(vocab.stageIndex + 1, maxStage);
-    await db.vocabulary.update({
-      where: { id: vocab.id },
-      data: { stageIndex: nextStage },
-    });
+    await db.vocabulary.update({ where: { id: vocab.id }, data: { stageIndex: nextStage } });
   }
   log.success(`Updated ${selected.length} words`);
 
@@ -84,17 +81,16 @@ export async function selectVocabularies() {
   return selected;
 }
 
-export async function buildReminderEmbeds(selected) {
+async function buildReminderEmbeds(selected) {
   log.step("Reminder", "Fetching cache entries to build embeds...");
   const db = createPrismaClient();
   const pageIds = selected.map((v) => v.pageId);
-  const cacheEntries = await db.notionCache.findMany({
-    where: { pageId: { in: pageIds } },
-  });
+  const cacheEntries = await db.notionCache.findMany({ where: { pageId: { in: pageIds } } });
   await db.$disconnect();
 
   const ordered = pageIds.map((id) => cacheEntries.find((c) => c.pageId === id)).filter(Boolean);
-
   log.success(`Built ${ordered.length} embed(s)`);
   return buildEmbeds(ordered);
 }
+
+module.exports = { selectVocabularies, buildReminderEmbeds };

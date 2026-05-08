@@ -1,11 +1,11 @@
-import { cmdDb, cmdVocab } from "./commands/db.js";
-import { cmdDiscord } from "./commands/discord.js";
-import { cmdBackup, cmdClean, cmdClear, cmdReset, cmdRestore } from "./commands/maintenance.js";
-import { cmdNews } from "./commands/news.js";
-import { cmdNotion } from "./commands/notion.js";
-import { cmdRemind } from "./commands/remind.js";
-import { cmdSimulate } from "./commands/simulate.js";
-import { closePrompt } from "./io.js";
+const { cmdDb, cmdVocab } = require("./commands/db");
+const { cmdDiscord } = require("./commands/discord");
+const { cmdBackup, cmdClean, cmdClear, cmdReset, cmdRestore } = require("./commands/maintenance");
+const { cmdNews } = require("./commands/news");
+const { cmdNotion } = require("./commands/notion");
+const { cmdRemind } = require("./commands/remind");
+const { cmdSimulate } = require("./commands/simulate");
+const { closePrompt } = require("./io");
 
 const commands = {
   db: {
@@ -156,7 +156,7 @@ function cmdHelp(args) {
   }
 }
 
-export async function runDev(argv) {
+async function runDev(argv) {
   const [command, ...args] = argv;
   const selected = command ? commands[command] : null;
 
@@ -174,3 +174,5 @@ export async function runDev(argv) {
     closePrompt();
   }
 }
+
+module.exports = { runDev };

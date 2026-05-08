@@ -1,9 +1,7 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import EmbedBuilder from "../builders/EmbedBuilder.js";
+const fs = require("fs");
+const path = require("path");
+const EmbedBuilder = require("../builders/EmbedBuilder");
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_PATH = path.resolve(__dirname, "../template/vocabulary.md");
 
 function loadTemplate() {
@@ -26,15 +24,11 @@ function resolveValue(raw, values) {
 
 function buildEmbedFromBlock(blockText, values) {
   const embed = new EmbedBuilder();
-  const lines = blockText
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
+  const lines = blockText.split("\n").map((l) => l.trim()).filter(Boolean);
 
   for (const line of lines) {
     const match = line.match(/^<(\w+)\|(.+)>$/);
     if (!match) continue;
-
     const [, directive, argsRaw] = match;
 
     if (directive === "title") {
@@ -49,9 +43,7 @@ function buildEmbedFromBlock(blockText, values) {
       const titleMatch = argsRaw.match(/title:"([^"]*)"/);
       const contentMatch = argsRaw.match(/content:("(?:[^"]*)")/);
       if (titleMatch && contentMatch) {
-        const fieldTitle = titleMatch[1];
-        const fieldValue = resolveValue(contentMatch[1], values) || "-";
-        embed.addField(fieldTitle, fieldValue, true);
+        embed.addField(titleMatch[1], resolveValue(contentMatch[1], values) || "-", true);
       }
     } else if (directive === "color") {
       embed.setColor(resolveValue(argsRaw, values));
@@ -75,7 +67,6 @@ function buildValues(vocabIndex, cacheEntry) {
   const sentence = JSON.parse(cacheEntry.sentences || "[]")[0] || "-";
   const transformations = asList(JSON.parse(cacheEntry.transformations || "[]"));
   const synonyms = asList(JSON.parse(cacheEntry.synonyms || "[]"));
-
   const notionUrl = `https://www.notion.so/${cacheEntry.pageId.replace(/-/g, "")}`;
 
   return {
@@ -89,7 +80,7 @@ function buildValues(vocabIndex, cacheEntry) {
   };
 }
 
-export function buildEmbeds(cacheEntries) {
+function buildEmbeds(cacheEntries) {
   const template = loadTemplate();
   const embedTemplate = extractEmbedTemplate(template);
 
@@ -100,3 +91,5 @@ export function buildEmbeds(cacheEntries) {
     return buildEmbedFromBlock(indexedBlock, values);
   });
 }
+
+module.exports = { buildEmbeds };

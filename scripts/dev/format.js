@@ -1,19 +1,18 @@
-export const SECTION_DIVIDER = "-".repeat(41);
+const SECTION_DIVIDER = "-".repeat(41);
 
-export function printSection(title) {
+function printSection(title) {
   console.log(SECTION_DIVIDER);
   console.log(title);
 }
 
-export function endSection() {
+function endSection() {
   console.log(SECTION_DIVIDER);
 }
 
-export function bar(count, total, width = 20) {
-  if (total <= 0) {
-    return ".".repeat(width);
-  }
-
+function bar(count, total, width = 20) {
+  if (total <= 0) return ".".repeat(width);
   const filled = Math.round((count / total) * width);
   return "#".repeat(filled) + ".".repeat(width - filled);
 }
+
+module.exports = { SECTION_DIVIDER, printSection, endSection, bar };

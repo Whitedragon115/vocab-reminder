@@ -1,10 +1,12 @@
-export async function cmdRemind() {
-  const { runReminder } = await import("../../../src/scheduler.js");
-  const { destroyDmClient } = await import("../../../src/services/discordService.js");
+const { runReminder } = require("../../../src/scheduler");
+const { destroyDmClient } = require("../../../src/services/discordService");
 
+async function cmdRemind() {
   try {
     await runReminder();
   } finally {
     await destroyDmClient();
   }
 }
+
+module.exports = { cmdRemind };

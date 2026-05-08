@@ -1,4 +1,4 @@
-export function weightedSample(pool, weights, count) {
+function weightedSample(pool, weights, count) {
   const selected = [];
   const remaining = [...pool];
 
@@ -8,7 +8,6 @@ export function weightedSample(pool, weights, count) {
 
     for (let index = 0; index < remaining.length; index += 1) {
       rand -= weights[remaining[index].stageIndex] ?? 1;
-
       if (rand <= 0) {
         selected.push(remaining[index]);
         remaining.splice(index, 1);
@@ -20,7 +19,7 @@ export function weightedSample(pool, weights, count) {
   return selected;
 }
 
-export function parseJsonList(value, fallback = []) {
+function parseJsonList(value, fallback = []) {
   try {
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? parsed : fallback;
@@ -29,7 +28,7 @@ export function parseJsonList(value, fallback = []) {
   }
 }
 
-export function formatTimestamp(date) {
+function formatTimestamp(date) {
   return [
     date.getFullYear(),
     String(date.getMonth() + 1).padStart(2, "0"),
@@ -38,3 +37,5 @@ export function formatTimestamp(date) {
     String(date.getMinutes()).padStart(2, "0"),
   ].join("-");
 }
+
+module.exports = { weightedSample, parseJsonList, formatTimestamp };

@@ -1,13 +1,10 @@
-import { Client } from "@notionhq/client";
+const { Client } = require("@notionhq/client");
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
 function getPlainText(richText) {
   if (!richText || !Array.isArray(richText)) return "";
-  return richText
-    .map((t) => t.plain_text)
-    .join("")
-    .trim();
+  return richText.map((t) => t.plain_text).join("").trim();
 }
 
 async function fetchToggleChildren(blockId, label) {
@@ -31,14 +28,9 @@ async function parsePageBlocks(pageId) {
   console.log(`     Blocks fetched: ${blocks.length}`);
 
   const sections = {
-    definition: [],
-    transformations: [],
-    synonyms: [],
-    antonyms: [],
-    sentences: [],
-    commonPhrases: [],
+    definition: [], transformations: [], synonyms: [],
+    antonyms: [], sentences: [], commonPhrases: [],
   };
-
   let currentSection = null;
 
   for (const block of blocks) {
@@ -53,10 +45,7 @@ async function parsePageBlocks(pageId) {
       continue;
     }
 
-    if (type === "divider") {
-      currentSection = null;
-      continue;
-    }
+    if (type === "divider") { currentSection = null; continue; }
 
     if (type === "toggle") {
       const text = getPlainText(block.toggle.rich_text).toLowerCase();
@@ -64,7 +53,6 @@ async function parsePageBlocks(pageId) {
       if (text.includes("transformation")) key = "transformations";
       else if (text.includes("synonym")) key = "synonyms";
       else if (text.includes("antonym")) key = "antonyms";
-
       if (key && block.has_children) {
         sections[key] = await fetchToggleChildren(block.id, key);
       }
@@ -93,25 +81,20 @@ async function parsePageBlocks(pageId) {
   }
 
   console.log(`     Definition: ${sections.definition.length} item(s)`);
-  console.log(
-    `     Sentence:   ${sections.sentences.length > 0 ? `"${sections.sentences[0].slice(0, 60)}..."` : "none"}`,
-  );
-
+  console.log(`     Sentence:   ${sections.sentences.length > 0 ? `"${sections.sentences[0].slice(0, 60)}..."` : "none"}`);
   return sections;
 }
 
 function parseProperties(properties) {
   const word = getPlainText(properties.Word?.title) || "";
   const partOfSpeech = (properties["Part of speech"]?.multi_select || [])
-    .map((s) => s.name)
-    .join(", ");
+    .map((s) => s.name).join(", ");
   return { word, partOfSpeech };
 }
 
-export async function parseVocabularyPage(page) {
+async function parseVocabularyPage(page) {
   const { word, partOfSpeech } = parseProperties(page.properties);
   const sections = await parsePageBlocks(page.id);
-
   return {
     pageId: page.id,
     word,
@@ -124,3 +107,5 @@ export async function parseVocabularyPage(page) {
     commonPhrases: JSON.stringify(sections.commonPhrases),
   };
 }
+
+module.exports = { parseVocabularyPage };

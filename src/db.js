@@ -1,9 +1,9 @@
-import { PrismaClient } from "./generated/prisma/client.ts";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+const { PrismaClient } = require("./generated/prisma/client");
+const { PrismaLibSql } = require("@prisma/adapter-libsql");
 
-export function createPrismaClient() {
+function createPrismaClient() {
   const adapter = new PrismaLibSql({ url: "file:data/data.db" });
   return new PrismaClient({ adapter });
 }
 
-export default createPrismaClient();
+module.exports = { createPrismaClient };

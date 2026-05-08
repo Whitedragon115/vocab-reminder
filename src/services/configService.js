@@ -1,14 +1,14 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+const fs = require("fs");
+const path = require("path");
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_PATH = path.resolve(__dirname, "../../data/config.json");
+const CONFIG_PATH = path.resolve(__dirname, "../../config.json");
 
-export function loadConfig() {
+function loadConfig() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
 }
 
-export function saveConfig(config) {
+function saveConfig(config) {
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), "utf8");
 }
+
+module.exports = { loadConfig, saveConfig };

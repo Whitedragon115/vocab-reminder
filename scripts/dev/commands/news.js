@@ -1,7 +1,7 @@
-import { endSection, printSection } from "../format.js";
+const { endSection, printSection } = require("../format");
+const { buildNewsContent } = require("../../../src/services/newsService");
 
-export async function cmdNews(args) {
-  const { buildNewsContent } = await import("../../../src/services/newsService.js");
+async function cmdNews(args) {
   const words = (args[0] ?? "technology, innovation, science")
     .split(",")
     .map((word) => word.trim());
@@ -22,3 +22,5 @@ export async function cmdNews(args) {
 
   endSection();
 }
+
+module.exports = { cmdNews };
