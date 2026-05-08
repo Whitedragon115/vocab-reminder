@@ -1,0 +1,42 @@
+{
+  "name": "dc-vocabulary",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx index.js",
+    "sync": "tsx -e \"import('./src/scheduler.js').then(m => m.runNotionSync())\"",
+    "remind": "tsx -e \"import('./src/scheduler.js').then(m => m.runReminder())\"",
+    "dev": "tsx scripts/dev.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "node scripts/setup-git-hooks.js",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.2",
+  "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "@notionhq/client": "^5.20.0",
+    "@prisma/adapter-libsql": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "axios": "^1.16.0",
+    "discord.js": "^14.26.4",
+    "dotenv": "^17.4.2",
+    "newsapi": "^2.4.1",
+    "node-cron": "^4.2.1",
+    "openai": "^6.36.0",
+    "prisma": "^7.8.0"
+  },
+  "devDependencies": {
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs,json,md,yml,yaml}": "prettier --write"
+  }
+}
