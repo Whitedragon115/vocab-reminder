@@ -9,7 +9,7 @@ function loadTemplate() {
 }
 
 function extractEmbedTemplate(templateContent) {
-  const match = templateContent.match(/>>> embed\n([\s\S]*?)<<</);
+  const match = templateContent.match(/> *> *> embed\n([\s\S]*?)< *< *</);
   if (!match) throw new Error("No embed block found in vocabulary.md");
   return match[1].trim();
 }
@@ -24,7 +24,7 @@ function resolveValue(raw, values) {
 
 function buildEmbedFromBlock(blockText, values) {
   const embed = new EmbedBuilder();
-  const lines = blockText.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = blockText.split("\n").map((l) => l.replace(/^(> *)+/, "").trim()).filter(Boolean);
 
   for (const line of lines) {
     const match = line.match(/^<(\w+)\|(.+)>$/);
