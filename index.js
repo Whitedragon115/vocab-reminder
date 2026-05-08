@@ -1,5 +1,6 @@
 const { execSync } = require("child_process");
 execSync("npx prisma generate", { stdio: "inherit" });
+execSync("npx prisma migrate deploy", { stdio: "inherit" });
 
 require("dotenv/config");
 const { startScheduler, runNotionSync } = require("./src/scheduler");
